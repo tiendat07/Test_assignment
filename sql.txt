@@ -1,0 +1,46 @@
+CREATE TABLE X
+(
+ID int,
+Channel varchar(255),
+Category varchar(255),
+GMV DECIMAL(5,2)
+);
+
+INSERT INTO X
+VALUES (1,'Horeca', 'Vegetable', 69.3);
+INSERT INTO X
+VALUES(2,'Horeca', 'Fruit', 25.3);
+INSERT INTO X
+VALUES(3,'Horeca', 'Non-veggie', 73);
+INSERT INTO X
+VALUES(4,'Horeca', 'Meat', 22.8);
+INSERT INTO X
+VALUES(5,'MT', 'Vegetable', 10.9);
+INSERT INTO X
+VALUES(6,'MT', 'Fruit', 1.1);
+INSERT INTO X
+VALUES(7,'MT', 'Non-veggie', 0.9);
+INSERT INTO X
+VALUES(8,'MT', 'Meat', 0.4);
+
+select * from X;
+
+select t1.channel as "Channel",t1.category as "Category", t1.gmv as "GMV"
+from 
+    (select channel,category, gmv, row_number() over(partition by channel order by gmv desc) as row_number
+    from X) t1
+where t1.row_number = 1
+order by t1.gmv DESC;
+
+with horeca as (
+    select * from X where channel like 'Horeca'
+),
+MT as (
+    select * from X where channel like 'MT'
+)
+select h.channel as "Channel_1", MT.channel as "Channel_2", h.Category as "Category",
+h.gmv as "GMV_1", MT.gmv as "GMV_2", to_char((h.gmv/MT.gmv)-1,'fm99D00') as "Comparision"
+from horeca h join MT on h.category = mt.category
+order by h.category asc;
+
+--ROUND((h.gmv/MT.gmv)-1,2)
